@@ -13,5 +13,9 @@ namespace DrawniteClient
     /// </summary>
     public partial class App : Application
     {
+        public App()
+        {
+            Networking.ClientRuntime r = new Networking.ClientRuntime();
+        }
     }
 }
