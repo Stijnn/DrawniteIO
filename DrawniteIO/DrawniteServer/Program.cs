@@ -1,3 +1,4 @@
+using DrawniteCore.Networking;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,15 +10,16 @@ namespace DrawniteServer
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
-            ServerRuntime sr = new ServerRuntime(new System.Net.IPEndPoint(IPAddress.Parse("127.0.0.1"), 20000));
-            sr.Start();
-
-            while (true)
+            ListeningService listeningService = new ListeningService(new System.Net.IPEndPoint(IPAddress.Parse("127.0.0.1"), 20000));
+            await listeningService.StartAsync();
+            string command = string.Empty;
+            while (!(command == "shutdown"))
             {
-
+                command = Console.ReadLine();
             }
+            await listeningService.ShutdownAsync();
         }
     }
 }
