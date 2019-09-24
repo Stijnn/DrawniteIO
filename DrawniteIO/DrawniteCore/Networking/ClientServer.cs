@@ -33,8 +33,10 @@ namespace DrawniteCore.Networking
                 byte[] messageLength = BitConverter.GetBytes(data.Length);
                 networkStream.Write(messageLength, 0, messageLength.Length);
                 AwaitConfirmation();
+                WriteConfirmation();
                 networkStream.Write(data, 0, data.Length);
                 AwaitConfirmation();
+                WriteConfirmation();
             }
         }
 
@@ -44,9 +46,9 @@ namespace DrawniteCore.Networking
             {
                 while (!shuttingDown)
                 {
-                    if (tcpClient.Available > 0)
+                    lock (networkLock)
                     {
-                        lock (networkLock)
+                        if (tcpClient.Available > 0)
                         {
                             byte[] lengthBuffer = new byte[4];
                             networkStream.Read(lengthBuffer, 0, lengthBuffer.Length);
@@ -57,10 +59,12 @@ namespace DrawniteCore.Networking
                                 break;
                             }
                             WriteConfirmation();
+                            AwaitConfirmation();
 
                             byte[] networkMessage = new byte[receivingByteSize];
                             networkStream.Read(networkMessage, 0, networkMessage.Length);
                             WriteConfirmation();
+                            AwaitConfirmation();
 
                             OnDataReceived?.Invoke(this, networkMessage);
                         }
@@ -81,8 +85,6 @@ namespace DrawniteCore.Networking
         {
             byte[] receiving = Encoding.ASCII.GetBytes("RECV");
             networkStream.Write(receiving, 0, receiving.Length);
-            while (!networkStream.DataAvailable)
-                Thread.Sleep(5);
         }
 
         private void AwaitConfirmation()

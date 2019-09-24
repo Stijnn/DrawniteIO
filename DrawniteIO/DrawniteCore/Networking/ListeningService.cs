@@ -49,6 +49,7 @@ namespace DrawniteCore.Networking
                 TcpClient client = await listener.AcceptTcpClientAsync();
                 ClientServer clientServer = new ClientServer(ref client);
                 connectedClients.Add(clientServer);
+                Console.WriteLine($"CLIENT CONNECTED: {((IPEndPoint)client.Client.RemoteEndPoint).Address.ToString()}");
                 clientServer.OnDataReceived += OnDataReceived;
             }
             listener.Stop();
@@ -57,6 +58,14 @@ namespace DrawniteCore.Networking
         private void OnDataReceived(ClientServer sender, object args)
         {
             Console.WriteLine(Encoding.ASCII.GetString((byte[])args));
+        }
+
+        public void Broadcast(byte[] data)
+        {
+            for (int i = 0; i < connectedClients.Count; i++)
+            {
+                connectedClients[i].SendData(data);
+            }
         }
     }
 }
