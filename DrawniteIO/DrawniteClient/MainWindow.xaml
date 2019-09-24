@@ -1,16 +1,49 @@
-﻿<Window x:Class="DrawniteClient.MainWindow"
+﻿<Controls:MetroWindow x:Class="DrawniteClient.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:local="clr-namespace:DrawniteClient"
+        xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <Button Content="Submit" Click="Button_Click" Margin="402,370,311.6,10" RenderTransformOrigin="3.279,0.007"/>
-        <TextBox Margin="10,370,396.6,10" FontSize="25" Text="bruh"/>
-        <Label Content="Enter lobby ID!" HorizontalAlignment="Left" Margin="10,339,0,0" VerticalAlignment="Top" Width="387" HorizontalContentAlignment="Center" FontSize="18"/>
-        <Button Content="Host game" Margin="704,370,9.6,10"/>
+        Title="DrawniteIO"
+        RenderOptions.BitmapScalingMode="HighQuality"
+        TitleCharacterCasing="Normal"
+        Height="450" Width="800"  
+        WindowTitleBrush="#212121"
+        NonActiveWindowTitleBrush="#212121"
+        BorderBrush="AliceBlue"
+        NonActiveBorderBrush="AliceBlue"
+        ResizeMode="CanResizeWithGrip"
+        ShowIconOnTitleBar="True"
+        >
+    <Controls:MetroWindow.IconTemplate>
+        <DataTemplate>
+            <iconPacks:PackIconIonicons 
+                Width="{TemplateBinding Width}" 
+                Height="{TemplateBinding Height}" 
+                Foreground="White"
+                Kind="ColorWandMD"
+                Margin="5"
+            />
+        </DataTemplate>
+    </Controls:MetroWindow.IconTemplate>
 
+    <Controls:MetroWindow.TitleTemplate>
+        <DataTemplate>
+            <TextBlock Text="{TemplateBinding Content}"
+                   TextTrimming="CharacterEllipsis"
+                   VerticalAlignment="Center"
+                   Margin="8"
+                   FontSize="{DynamicResource WindowTitleFontSize}"
+                   FontFamily="Bahnschrift Light" />
+        </DataTemplate>
+    </Controls:MetroWindow.TitleTemplate>
+
+    <Grid>
+        <DockPanel>
+            <Frame x:Name="FrameViewPage" />
+        </DockPanel>
     </Grid>
-</Window>
+</Controls:MetroWindow>

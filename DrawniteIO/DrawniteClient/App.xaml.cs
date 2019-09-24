@@ -22,9 +22,9 @@ namespace DrawniteClient
 
         public App()
         {
-            this.clientWrapper = new TcpClientWrapper();
-            clientWrapper.OnReceived += OnReceived;
-            clientWrapper.Connect(new IPEndPoint(IPAddress.Parse(Constants.SERVER_IP), Constants.AUTH_PORT));
+            //this.clientWrapper = new TcpClientWrapper();
+            //clientWrapper.OnReceived += OnReceived;
+            //clientWrapper.Connect(new IPEndPoint(IPAddress.Parse(Constants.SERVER_IP), Constants.AUTH_PORT));
         }
 
         private void OnReceived(IConnection client, dynamic args)
