@@ -10,6 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Networking\ClientServer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Networking\Data\Lobby.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Networking\ListeningService.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Networking\NetworkService.cs" />
   </ItemGroup>
