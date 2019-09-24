@@ -17,18 +17,19 @@ namespace DrawniteClient
     /// </summary>
     public partial class App : Application
     {
+        private TcpClientWrapper clientWrapper;
+        public TcpClientWrapper ClientWrapper => clientWrapper;
+
         public App()
         {
-            NetworkService network = new NetworkService();
-            network.OnDataReceived += Network_OnDataReceived;
-            network.Connect(new System.Net.IPEndPoint(IPAddress.Parse("145.49.23.205"), 20000));
-            network.SendData(Encoding.ASCII.GetBytes("faka man bro"));
+            this.clientWrapper = new TcpClientWrapper();
+            clientWrapper.OnReceived += OnReceived;
+            clientWrapper.Connect(new IPEndPoint(IPAddress.Parse(Constants.SERVER_IP), Constants.AUTH_PORT));
         }
 
-        private void Network_OnDataReceived(NetworkService service, object args)
+        private void OnReceived(IConnection client, dynamic args)
         {
-            Debug.WriteLine(Encoding.ASCII.GetString((byte[]) args));
-
+            Console.WriteLine(Encoding.ASCII.GetString(args));
         }
     }
 }

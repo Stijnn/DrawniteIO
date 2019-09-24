@@ -6,18 +6,18 @@ namespace DrawniteCore.Networking.Data
 {
     class Lobby
     {
-        private IList<ClientServer> connectedClients;
+        private IList<IConnection> connectedClients;
         private readonly int port;
         private Guid lobbyId;
-        private ClientServer lobbyLeader;
+        private IConnection lobbyLeader;
         private LobbyStatus status;
 
-        public Lobby(int port, Guid lobbyId, ref ClientServer lobbyLeader)
+        public Lobby(int port, Guid lobbyId, ref IConnection lobbyLeader)
         {
             this.port = port;
             this.lobbyId = lobbyId;
             this.lobbyLeader = lobbyLeader;
-            this.connectedClients = new List<ClientServer>();
+            this.connectedClients = new List<IConnection>();
             this.connectedClients.Add(lobbyLeader);
             status = LobbyStatus.AWAITING_START;
         }

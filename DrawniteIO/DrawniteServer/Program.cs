@@ -1,7 +1,6 @@
 using DrawniteCore.Networking;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +11,10 @@ namespace DrawniteServer
     {
         static async Task Main(string[] args)
         {
-            ListeningService listeningService = new ListeningService(new System.Net.IPEndPoint(IPAddress.Parse("145.49.23.205"), 20000));
+            TcpServerWrapper listeningService = new TcpServerWrapper(new IPEndPoint(IPAddress.Parse(Constants.SERVER_IP), Constants.AUTH_PORT));
+            listeningService.OnClientDataReceived += OnReceived;
+            listeningService.OnClientConnected += ListeningService_OnClientConnected;
+            listeningService.OnClientDisconnected += ListeningService_OnClientDisconnected;
             await listeningService.StartAsync();
             while (true)
             {
@@ -20,9 +22,26 @@ namespace DrawniteServer
                 if (command == "shutdown")
                     break;
                 else
-                    listeningService.Broadcast(Encoding.ASCII.GetBytes(command));
+                {
+                    new List<IConnection>(listeningService.Connections).ForEach(x => x.Write(command));
+                }
             }
             await listeningService.ShutdownAsync();
+        }
+
+        private static void ListeningService_OnClientConnected(IConnection client, dynamic args)
+        {
+            Console.WriteLine($"CLIENT {client.RemoteEndPoint.Address} CONNECTED");
+        }
+
+        private static void ListeningService_OnClientDisconnected(IConnection client, dynamic args)
+        {
+            Console.WriteLine($"CLIENT {client.RemoteEndPoint.Address} DISCONNECTED");
+        }
+
+        private static void OnReceived(IConnection client, dynamic args)
+        {
+            Console.WriteLine($"CLIENT {client.RemoteEndPoint.Address} SENT {Encoding.ASCII.GetString(args)}");
         }
     }
 }
