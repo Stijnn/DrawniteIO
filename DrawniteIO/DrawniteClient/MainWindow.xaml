@@ -7,6 +7,10 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <Grid>
-        
+        <Button Content="Submit" Click="Button_Click" Margin="402,370,311.6,10" RenderTransformOrigin="3.279,0.007"/>
+        <TextBox Margin="10,370,396.6,10" FontSize="25" Text="bruh"/>
+        <Label Content="Enter lobby ID!" HorizontalAlignment="Left" Margin="10,339,0,0" VerticalAlignment="Top" Width="387" HorizontalContentAlignment="Center" FontSize="18"/>
+        <Button Content="Host game" Margin="704,370,9.6,10"/>
+
     </Grid>
 </Window>
