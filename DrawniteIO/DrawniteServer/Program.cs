@@ -12,7 +12,7 @@ namespace DrawniteServer
     {
         static async Task Main(string[] args)
         {
-            ListeningService listeningService = new ListeningService(new System.Net.IPEndPoint(IPAddress.Parse("127.0.0.1"), 20000));
+            ListeningService listeningService = new ListeningService(new System.Net.IPEndPoint(IPAddress.Parse("145.49.23.205"), 20000));
             await listeningService.StartAsync();
             string command = string.Empty;
             while (!(command == "shutdown"))

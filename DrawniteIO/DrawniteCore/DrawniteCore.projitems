@@ -9,5 +9,8 @@
     <Import_RootNamespace>DrawniteCore</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Networking\ClientServer.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Networking\ListeningService.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Networking\NetworkService.cs" />
   </ItemGroup>
 </Project>
