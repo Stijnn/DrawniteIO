@@ -29,6 +29,7 @@ namespace DrawniteCore.Networking
 
         public NetworkConnection(ref NetworkStream networkStream, IPEndPoint remoteEndPoint)
         {
+            currentReceivingState = ConnectionStatus.LENGTH_RECEIVING;
             this.networkLock = new object();
             this.networkStream = networkStream;
             new Thread(Receive).Start();
@@ -88,6 +89,8 @@ namespace DrawniteCore.Networking
                             lastMessage = networkMessage;
                             OnReceived?.Invoke(this, networkMessage);
                         }
+                        else
+                            Thread.Sleep(1);
                     }
                 }
             }
@@ -109,9 +112,6 @@ namespace DrawniteCore.Networking
 
         private void AwaitConfirmation()
         {
-            while (!networkStream.DataAvailable)
-                Thread.Sleep(1);
-
             byte[] msg = new byte[1];
             networkStream.Read(msg, 0, msg.Length);
         }
@@ -125,6 +125,13 @@ namespace DrawniteCore.Networking
         public void Dispose()
         {
             
+        }
+
+        private enum ConnectionStatus
+        {
+            LENGTH_RECEIVING,
+            DATA_RECEIVING,
+            AWAITING_CONFIRMATION,
         }
     }
 }
