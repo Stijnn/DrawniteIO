@@ -12,6 +12,10 @@
     <Grid>
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
             <Grid Margin="0, 0, 0, 20">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="223*"/>
+                    <ColumnDefinition Width="87*"/>
+                </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
@@ -23,9 +27,9 @@
                                        VerticalAlignment="Center"
                                        Foreground="LightGray"
                                        Kind="PaletteSolid" 
-                                       Margin="20"/>
+                                       Margin="123,20,36.392,20"/>
 
-                <Label Grid.Row="1" Content="DrawniteIO" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="20" FontStyle="Oblique"  FontFamily="Bahnschrift Light"/>
+                <Label Grid.Row="1" Content="DrawniteIO" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" FontSize="20" FontStyle="Oblique"  FontFamily="Bahnschrift Light" Grid.ColumnSpan="2"/>
             </Grid>
 
             <Grid Margin="5">
