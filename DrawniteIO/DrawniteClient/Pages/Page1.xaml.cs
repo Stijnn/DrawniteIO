@@ -23,6 +23,17 @@ namespace DrawniteClient.Pages
         public Page1()
         {
             InitializeComponent();
+            for (int i = 0; i < 10; i++)
+            {
+                WriteLn("big nigga");
+            }
+            
+
+        }
+
+        private void WriteLn(string text)
+        {
+            guess_textblock.Text += text + Environment.NewLine; // tbLog is a TextBlock
         }
     }
 }
