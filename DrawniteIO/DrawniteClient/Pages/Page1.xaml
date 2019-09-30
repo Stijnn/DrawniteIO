@@ -20,7 +20,9 @@
                 <RowDefinition Height="10*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" HorizontalAlignment="Stretch" Margin="0,0,5,0" Padding="5" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Stretch" Background="#FF444444" Foreground="White" FontSize="20"/>
+            <ScrollViewer>
+                <TextBlock x:Name="guess_textblock" Grid.Row="0" HorizontalAlignment="Stretch" Margin="0,0,5,0" Padding="5" TextWrapping="Wrap" Text="TextBlock" VerticalAlignment="Stretch" Background="#FF444444" Foreground="White" FontSize="20"/>
+            </ScrollViewer>
             <TextBox HorizontalAlignment="Stretch" Grid.Row="1" Margin="0,0,5,5"  TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Stretch" Height="40" FontSize="20"/>
         </Grid>
         <InkCanvas Grid.Column="1" Margin="10,0,10,5" HorizontalAlignment="Stretch" IsEnabled="True" VerticalAlignment="Stretch" Background="White"/>

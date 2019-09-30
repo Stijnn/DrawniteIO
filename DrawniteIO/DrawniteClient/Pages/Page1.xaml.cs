@@ -1,5 +1,4 @@
-﻿using DrawniteCore.Networking.Data;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -21,10 +20,20 @@ namespace DrawniteClient.Pages
     /// </summary>
     public partial class Page1 : Page
     {
-        public Page1(Guid lobbyId, Guid playerGuid)
+        public Page1(Guid lobbyId, Guid playerId)
         {
             InitializeComponent();
-            Application.Current.MainWindow.Title = lobbyId.ToString();
+            for (int i = 0; i < 10; i++)
+            {
+                WriteLn("big nigga");
+            }
+            
+
+        }
+
+        private void WriteLn(string text)
+        {
+            guess_textblock.Text += text + Environment.NewLine; // tbLog is a TextBlock
         }
     }
 }
