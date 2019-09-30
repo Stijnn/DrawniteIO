@@ -1,4 +1,5 @@
 ﻿using DrawniteCore.Networking;
+using DrawniteCore.Networking.Data;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +15,7 @@ namespace DrawniteServer
         private DrawniteCore.Networking.Data.LobbyInfo lobbyInfo;
         public DrawniteCore.Networking.Data.LobbyInfo LobbyInfo => lobbyInfo;
 
-        private Queue<string> playerMessageQueue;
+        private Queue<Message> playerMessageQueue;
         private TcpServerWrapper lobbyServer;
         private bool lobbyActive;
 
@@ -26,7 +27,7 @@ namespace DrawniteServer
             this.lobbyServer = new TcpServerWrapper(new System.Net.IPEndPoint(IPAddress.Any, lobbyPort));
             this.lobbyServer.OnClientConnected += OnPlayerJoinedLobby;
             this.lobbyServer.OnClientDataReceived += OnPlayerDataReceived;
-            this.playerMessageQueue = new Queue<string>();
+            this.playerMessageQueue = new Queue<Message>();
             lobbyActive = this.lobbyServer.StartAsync().Result;
 
             if (lobbyActive)
@@ -75,10 +76,11 @@ namespace DrawniteServer
             playerMessageQueue.Enqueue(Encoding.ASCII.GetString(args));
         }
 
-        private void HandleMessage(string msg)
+        private void HandleMessage(Message msg)
         {
 
         }
+
         private void AwaitingStart()
         {
 

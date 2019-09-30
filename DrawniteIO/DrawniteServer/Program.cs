@@ -11,10 +11,10 @@ namespace DrawniteServer
     class Program
     {
         private static LobbyManager LobbyManager;
+        private static TcpServerWrapper listeningService = new TcpServerWrapper(new IPEndPoint(IPAddress.Parse(Constants.SERVER_IP), Constants.AUTH_PORT));
 
         static async Task Main(string[] args)
         {
-            TcpServerWrapper listeningService = new TcpServerWrapper(new IPEndPoint(IPAddress.Parse(Constants.SERVER_IP), Constants.AUTH_PORT));
             LobbyManager.Init();
             LobbyManager = LobbyManager.Instance;
             listeningService.OnClientDataReceived += OnReceived;
@@ -43,7 +43,8 @@ namespace DrawniteServer
             switch (networkMessage.Command)
             {
                 case "host":
-                    Console.WriteLine("start host");
+                    Lobby lobby = LobbyManager.Instance.NewLobby(Guid.NewGuid());
+                    client.Write(new Message("lobby/create", lobby.LobbyInfo));
                 break;
 
                 case "join":

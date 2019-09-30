@@ -17,6 +17,7 @@ namespace DrawniteCore.Networking
 
         void Write(byte[] data);
         void Write(string data);
+        void Write(dynamic data);
         void Shutdown();
     }
 }
