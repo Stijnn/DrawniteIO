@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DrawniteCore.Networking.Data;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,9 +21,10 @@ namespace DrawniteClient.Pages
     /// </summary>
     public partial class Page1 : Page
     {
-        public Page1()
+        public Page1(Guid lobbyId, Guid playerGuid)
         {
             InitializeComponent();
+            Application.Current.MainWindow.Title = lobbyId.ToString();
         }
     }
 }

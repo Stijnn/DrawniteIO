@@ -11,6 +11,8 @@ namespace DrawniteServer
         private static LobbyManager instance;
         public static LobbyManager Instance => instance;
 
+        private object editLock = new object();
+
         public static void Init()
         {
             if (instance == null)
@@ -29,28 +31,39 @@ namespace DrawniteServer
         private Random rnd = new Random(DateTime.Now.Millisecond);
         public Lobby NewLobby(Guid lobbyLeader)
         {
-            int lobbyPort = 0;
-            while (lobbyPort < 20001 || runningLobbies.Where(x => x.LobbyInfo.LobbyPort == lobbyPort).Count() > 0)
+            lock (editLock)
             {
-                lobbyPort = rnd.Next(20001, 30000);
+                int lobbyPort = 0;
+                while (lobbyPort < 20001 || runningLobbies.Where(x => x.LobbyInfo.LobbyPort == lobbyPort).Count() > 0)
+                {
+                    lobbyPort = rnd.Next(20001, 30000);
+                }
+                Lobby newLobby = new Lobby(lobbyLeader, lobbyPort);
+                runningLobbies.Add(newLobby);
+                return newLobby;
             }
-            Lobby newLobby = new Lobby(lobbyLeader, lobbyPort);
-            runningLobbies.Add(newLobby);
-            return newLobby;
+        }
+
+        public Lobby FindLobby(Guid lobbyId)
+        {
+            return runningLobbies.Where(x => x.LobbyInfo.LobbyId == lobbyId).FirstOrDefault();
         }
 
         public void Update()
         {
-            while (closingLobbies.Count > 0)
-                runningLobbies.Remove(closingLobbies.Pop());
-
-            runningLobbies.ForEach(x =>
+            lock(editLock)
             {
-                if (x.PlayerCount <= 0)
+                while (closingLobbies.Count > 0)
+                    runningLobbies.Remove(closingLobbies.Pop());
+
+                runningLobbies.ForEach(x =>
                 {
-                    closingLobbies.Push(x);
-                }
-            });
+                    if (x.PlayerCount <= 0)
+                    {
+                        //closingLobbies.Push(x);
+                    }
+                });
+            }
         }
     }
 }

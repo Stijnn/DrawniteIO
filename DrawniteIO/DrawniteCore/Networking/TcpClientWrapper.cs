@@ -68,10 +68,7 @@ namespace DrawniteCore.Networking
             {
                 try
                 {
-                    this.networkConnection?.Shutdown();
-                    this.client?.Close();
-                    this.networkConnection = null;
-                    this.client = null;
+                    Disconnect();
                     active = Connect(newEndPoint);
                     OnClientForwarded?.Invoke(networkConnection, null);
                 }

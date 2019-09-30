@@ -25,7 +25,7 @@ namespace DrawniteClient
         public MainWindow()
         {
             InitializeComponent();
-            FrameViewPage.Navigate(new Pages.Page1());
+            FrameViewPage.Navigate(new Pages.StartPage(ref FrameViewPage));
         }
     }
 }

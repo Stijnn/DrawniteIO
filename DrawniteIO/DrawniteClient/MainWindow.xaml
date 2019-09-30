@@ -44,7 +44,7 @@
 
     <Grid>
         <DockPanel>
-            <Frame x:Name="FrameViewPage" />
+            <Frame x:Name="FrameViewPage" NavigationUIVisibility="Hidden"/>
         </DockPanel>
     </Grid>
 </Controls:MetroWindow>

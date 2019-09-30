@@ -17,6 +17,7 @@ namespace DrawniteServer
 
         private Queue<Message> playerMessageQueue;
         private TcpServerWrapper lobbyServer;
+        private Dictionary<Guid, string> playerList;
         private bool lobbyActive;
 
         public int PlayerCount => lobbyServer.Connections.Count();
@@ -28,10 +29,11 @@ namespace DrawniteServer
             this.lobbyServer.OnClientConnected += OnPlayerJoinedLobby;
             this.lobbyServer.OnClientDataReceived += OnPlayerDataReceived;
             this.playerMessageQueue = new Queue<Message>();
+            this.playerList = new Dictionary<Guid, string>();
             lobbyActive = this.lobbyServer.StartAsync().Result;
 
             if (lobbyActive)
-                new Thread(RunGame);
+                new Thread(RunGame).Start();
         }
 
         private void RunGame()
@@ -73,12 +75,22 @@ namespace DrawniteServer
 
         private void OnPlayerDataReceived(IConnection client, dynamic args)
         {
-            playerMessageQueue.Enqueue(Encoding.ASCII.GetString(args));
+            playerMessageQueue.Enqueue(args);
         }
 
         private void HandleMessage(Message msg)
         {
+            switch (msg.Command)
+            {
+                case "player/join":
+                    Guid playerGuid = msg.Data.GUID;
+                    string playerName = msg.Data.Username;
+                    playerList.Add(playerGuid, playerName);
+                break;
 
+                default:
+                break;
+            }
         }
 
         private void AwaitingStart()

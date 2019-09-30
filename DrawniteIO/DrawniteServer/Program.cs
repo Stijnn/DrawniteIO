@@ -43,12 +43,26 @@ namespace DrawniteServer
             switch (networkMessage.Command)
             {
                 case "host":
-                    Lobby lobby = LobbyManager.Instance.NewLobby(Guid.NewGuid());
-                    client.Write(new Message("lobby/create", lobby.LobbyInfo));
+                    {
+                        Lobby lobby = LobbyManager.Instance.NewLobby(Guid.NewGuid());
+                        client.Write(new Message("lobby/create", new
+                        {
+                            LobbyInfo = lobby.LobbyInfo,
+                            PlayerGuid = lobby.LobbyInfo.LobbyLeader
+                        }));
+                    }
                 break;
 
                 case "join":
-                    Console.WriteLine("validate and join");
+                    {
+                        Guid lobbyId = networkMessage.Data.LobbyId;
+                        Lobby lobby = LobbyManager.Instance.FindLobby(lobbyId);
+                        client.Write(new Message("lobby/join", new
+                        {
+                            LobbyInfo = lobby.LobbyInfo,
+                            PlayerGuid = Guid.NewGuid()
+                        }));
+                    }
                 break;
             }
         }
