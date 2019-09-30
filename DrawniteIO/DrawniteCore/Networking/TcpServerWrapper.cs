@@ -62,6 +62,7 @@ namespace DrawniteCore.Networking
                 NetworkStream clientStream = client.GetStream();
                 NetworkConnection connection = new NetworkConnection(ref clientStream, (IPEndPoint)client.Client.RemoteEndPoint);
                 connection.OnDisconnected       += (x, y) => OnClientDisconnected?.Invoke(x, y);
+                connection.OnDisconnected       += (x, y) => { connectedClients.Remove(x); x.Shutdown(); };
                 connection.OnError              += (x, y) => OnClientError?.Invoke(x, y);
                 connection.OnReceived           += (x, y) => OnClientDataReceived?.Invoke(x, y);
                 OnClientConnected?.Invoke(connection, null);

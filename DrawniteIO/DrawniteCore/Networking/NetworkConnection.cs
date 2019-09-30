@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -14,8 +15,7 @@ namespace DrawniteCore.Networking
         private readonly NetworkStream networkStream;
         private readonly object networkLock;
 
-        private byte[] lastMessage;
-        public byte[] LastMessage => lastMessage;
+        public Data.Message LastMessage { get; private set; }
 
         private bool active = false;
 
@@ -29,7 +29,6 @@ namespace DrawniteCore.Networking
 
         public NetworkConnection(ref NetworkStream networkStream, IPEndPoint remoteEndPoint)
         {
-            currentReceivingState = ConnectionStatus.LENGTH_RECEIVING;
             this.networkLock = new object();
             this.networkStream = networkStream;
             new Thread(Receive).Start();
@@ -41,6 +40,11 @@ namespace DrawniteCore.Networking
         public void Write(string data)
         {
             this.Write(Encoding.ASCII.GetBytes(data));
+        }
+
+        public void Write(dynamic json)
+        {
+            this.Write(JsonConvert.SerializeObject(json));
         }
 
         public void Write(byte[] data)
@@ -83,11 +87,13 @@ namespace DrawniteCore.Networking
                             byte[] networkMessage = new byte[receivingByteSize];
                             networkStream.Read(networkMessage, 0, networkMessage.Length);
 
+                            Data.Message receivedMessage = Newtonsoft.Json.JsonConvert.DeserializeObject<Data.Message>(Encoding.ASCII.GetString(networkMessage));
+
                             WriteConfirmation();
                             AwaitConfirmation();
 
-                            lastMessage = networkMessage;
-                            OnReceived?.Invoke(this, networkMessage);
+                            LastMessage = receivedMessage;
+                            OnReceived?.Invoke(this, receivedMessage);
                         }
                         else
                             Thread.Sleep(1);
@@ -125,13 +131,6 @@ namespace DrawniteCore.Networking
         public void Dispose()
         {
             
-        }
-
-        private enum ConnectionStatus
-        {
-            LENGTH_RECEIVING,
-            DATA_RECEIVING,
-            AWAITING_CONFIRMATION,
         }
     }
 }

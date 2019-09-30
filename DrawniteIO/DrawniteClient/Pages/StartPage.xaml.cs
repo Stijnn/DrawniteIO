@@ -30,11 +30,14 @@ namespace DrawniteClient.Pages
         private async void OnConnectBttn(object sender, RoutedEventArgs e)
         {
             await (Application.Current.MainWindow as MainWindow).ShowMessageAsync("Connect", "You clicked connect");
+            (Application.Current as App).ClientWrapper.NetworkConnection.Write(new DrawniteCore.Networking.Data.Message("join", null));
+
         }
 
         private async void OnHostBttn(object sender, RoutedEventArgs e)
         {
             await (Application.Current.MainWindow as MainWindow).ShowMessageAsync("Connect", "You clicked host");
+            (Application.Current as App).ClientWrapper.NetworkConnection.Write(new DrawniteCore.Networking.Data.Message("host", null));
         }
     }
 }
