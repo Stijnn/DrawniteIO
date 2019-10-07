@@ -63,11 +63,12 @@ namespace DrawniteClient.Views
             LobbyStatus gameState = returnMessage.Data.LobbyInfo.LobbyStatus;
             Guid lobbyId = returnMessage.Data.LobbyInfo.LobbyId;
             Guid playerId = returnMessage.Data.PlayerGuid;
+            Guid lobbyLeader = returnMessage.Data.LobbyInfo.LobbyLeader;
 
             switch (gameState)
             {
                 case LobbyStatus.AWAITING_START:
-                    this.NavigationService.Navigate(new LobbyPage(lobbyId, playerId));
+                    this.NavigationService.Navigate(new LobbyPage(lobbyId, playerId, playerId == lobbyLeader));
                 break;
 
                 case LobbyStatus.PLAYING:
@@ -115,7 +116,8 @@ namespace DrawniteClient.Views
 
             Guid lobbyId = returnMessage.Data.LobbyInfo.LobbyId;
             Guid playerId = returnMessage.Data.PlayerGuid;
-            this.NavigationService.Navigate(new LobbyPage(lobbyId, playerId));
+            Guid lobbyLeader = returnMessage.Data.LobbyInfo.LobbyLeader;
+            this.NavigationService.Navigate(new LobbyPage(lobbyId, playerId, playerId == lobbyLeader));
         }
     }
 }

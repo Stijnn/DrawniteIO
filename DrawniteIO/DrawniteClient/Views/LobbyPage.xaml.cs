@@ -23,9 +23,14 @@ namespace DrawniteClient.Views
     /// </summary>
     public partial class LobbyPage : NetworkPage
     {
-        public LobbyPage(Guid lobbyId, Guid playerId)
+        private bool IsLobbyLeader;
+        private Guid MyPlayerId;
+
+        public LobbyPage(Guid lobbyId, Guid playerId, bool isLeader)
         {
             InitializeComponent();
+            IsLobbyLeader = isLeader;
+            this.MyPlayerId = playerId;
             this.NetworkConnection.OnReceived += OnPacketReceived;
             txtLobbyId.Text = lobbyId.ToString();
             this.NetworkConnection.Write(new Message("lobby/playerlist", null));
@@ -48,20 +53,7 @@ namespace DrawniteClient.Views
 
                 case "player/disconnected":
                 {
-                    Player player = ((JObject)args.Data.Player).ToObject<Player>();
-                    Dispatcher.Invoke(() =>
-                    {
-                        Stack<int> removingIndices = new Stack<int>();
-                        for (int i = 0; i < lvConnectedPlayers.Children.Count; i++)
-                        {
-                            ConnectedPlayer connectedPlayer = lvConnectedPlayers.Children[i] as ConnectedPlayer;
-                            if (connectedPlayer.PlayerName == player.Username)
-                                removingIndices.Push(i);
-                        }
-
-                        while (removingIndices.Count > 0)
-                            lvConnectedPlayers.Children.RemoveAt(removingIndices.Pop());
-                    });
+                    this.NetworkConnection.Write(new Message("lobby/playerlist", null));
                 }
                 break;
 
@@ -74,6 +66,9 @@ namespace DrawniteClient.Views
                         for (int i = 0; i < playerList.Count; i++)
                         {
                             lvConnectedPlayers.Children.Add(new Controls.ConnectedPlayer(playerList[i].Username, playerList[i].IsLeader));
+
+                            if (playerList[i].PlayerId == MyPlayerId && playerList[i].IsLeader)
+                                IsLobbyLeader = true;
                         }
                     });
                 }

@@ -55,15 +55,15 @@ namespace DrawniteServer
                     {
                         case DrawniteCore.Networking.Data.LobbyStatus.AWAITING_START:
                             AwaitingStart();
-                            break;
+                        break;
 
                         case DrawniteCore.Networking.Data.LobbyStatus.PLAYING:
                             Play();
-                            break;
+                        break;
 
                         case DrawniteCore.Networking.Data.LobbyStatus.AWAITING_RESTART:
                             AwaitingRestart();
-                            break;
+                        break;
                     }
                 }
             }
@@ -86,11 +86,27 @@ namespace DrawniteServer
                 Player disconnectingPlayer = playerList.Where(x => x.ReplicatedConnection == client).FirstOrDefault();
                 if (disconnectingPlayer != null)
                 {
+                    bool retargetHost = false;
+                    if (disconnectingPlayer.PlayerId == LobbyInfo.LobbyLeader)
+                    {
+                        if (playerList.Count - 1 == 0)
+                            this.Close();
+                        else
+                            retargetHost = true;
+                    }
+
+                    playerList.Remove(disconnectingPlayer);
+
+                    if (retargetHost)
+                    {
+                        this.lobbyInfo.LobbyLeader = playerList[0].PlayerId;
+                        playerList[0].IsLeader = true;
+                    }
+
                     playerList.ForEach(x => x.ReplicatedConnection.Write(new Message("player/disconnected", new
                     {
                         Player = disconnectingPlayer
                     })));
-                    playerList.Remove(disconnectingPlayer);
                 }
             }
         }
@@ -131,9 +147,6 @@ namespace DrawniteServer
                     });
                     message.Item1.Write(networkMessage);
                 }
-                break;
-
-                default:
                 break;
             }
         }
