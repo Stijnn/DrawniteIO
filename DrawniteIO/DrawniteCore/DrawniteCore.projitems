@@ -11,6 +11,7 @@
   <ItemGroup>
     <Compile Include="$(MSBuildThisFileDirectory)Networking\Constants.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Networking\Data\Message.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Networking\Data\Player.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Networking\TcpClientWrapper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Networking\IConnection.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Networking\NetworkConnection.cs" />

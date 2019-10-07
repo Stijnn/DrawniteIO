@@ -42,7 +42,7 @@ namespace DrawniteServer
             Message networkMessage = (Message)args;
             switch (networkMessage.Command)
             {
-                case "host":
+                case "player/host":
                     {
                         Lobby lobby = LobbyManager.Instance.NewLobby(Guid.NewGuid());
                         client.Write(new Message("lobby/create", new
@@ -53,7 +53,7 @@ namespace DrawniteServer
                     }
                 break;
 
-                case "join":
+                case "player/join":
                     {
                         Guid lobbyId = networkMessage.Data.LobbyId;
                         Lobby lobby = LobbyManager.Instance.FindLobby(lobbyId);

@@ -6,6 +6,7 @@
         xmlns:iconPacks="http://metro.mahapps.com/winfx/xaml/iconpacks"
         xmlns:local="clr-namespace:DrawniteClient"
         xmlns:Controls="clr-namespace:MahApps.Metro.Controls;assembly=MahApps.Metro"
+        xmlns:li1="clr-namespace:LoadingIndicators.WPF;assembly=LoadingIndicators.WPF"
         mc:Ignorable="d"
         Title="DrawniteIO"
         WindowState="Maximized"
@@ -18,7 +19,7 @@
         NonActiveBorderBrush="AliceBlue"
         ResizeMode="CanResizeWithGrip"
         ShowIconOnTitleBar="True"
-        >
+                      Closing="OnWindowClosing">
     <Controls:MetroWindow.IconTemplate>
         <DataTemplate>
             <iconPacks:PackIconIonicons 

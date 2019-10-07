@@ -13,7 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace DrawniteClient.Pages
+namespace DrawniteClient.Views
 {
     using DrawniteCore.Networking;
     using DrawniteCore.Networking.Data;
@@ -25,27 +25,24 @@ namespace DrawniteClient.Pages
     /// <summary>
     /// Interaction logic for StartPage.xaml
     /// </summary>
-    public partial class StartPage : Page
+    public partial class StartPage : NetworkPage
     {
-        private Frame parentFrameView;
-
-        public StartPage(ref Frame parentFrameView)
+        public StartPage()
         {
             InitializeComponent();
-            this.parentFrameView = parentFrameView;
         }
 
         private async void OnConnectBttn(object sender, RoutedEventArgs e)
         {
             string username = await (Application.Current.MainWindow as MainWindow).ShowInputAsync("Connect", "You clicked connect");
-            (Application.Current as App).ClientWrapper.NetworkConnection.Write(new DrawniteCore.Networking.Data.Message("join", new
+            this.NetworkConnection.Write(new DrawniteCore.Networking.Data.Message("player/join", new
             {
                 LobbyId = Guid.Parse(txtLobbyId.Text)
             }));
 
             DrawniteCore.Networking.Data.Message returnMessage = null;
             ManualResetEvent receivedSignal = new ManualResetEvent(false);
-            (Application.Current as App).ClientWrapper.OnReceived += async (client, message) =>
+            this.NetworkConnection.OnReceived += async (client, message) =>
             {
                 returnMessage = message;
                 receivedSignal.Set();
@@ -53,25 +50,44 @@ namespace DrawniteClient.Pages
             receivedSignal.WaitOne();
 
             int lobbyPort = returnMessage.Data.LobbyInfo.LobbyPort;
-            bool result = (Application.Current as App).ClientWrapper.Forward(new System.Net.IPEndPoint(IPAddress.Parse(Constants.SERVER_IP), lobbyPort));
+            bool result = this.NetworkClient.Forward(new System.Net.IPEndPoint(IPAddress.Parse(Constants.SERVER_IP), lobbyPort));
             if (result)
             {
-                (Application.Current as App).ClientWrapper.NetworkConnection.Write(new Message("player/join", new
+                this.NetworkConnection.Write(new Message("player/join", new
                 {
                     Username = username,
                     GUID = returnMessage.Data.PlayerGuid
                 }));
             }
 
+            LobbyStatus gameState = returnMessage.Data.LobbyInfo.LobbyStatus;
             Guid lobbyId = returnMessage.Data.LobbyInfo.LobbyId;
             Guid playerId = returnMessage.Data.PlayerGuid;
-            parentFrameView.Navigate(new Page1(lobbyId, playerId));
+
+            switch (gameState)
+            {
+                case LobbyStatus.AWAITING_START:
+                    this.NavigationService.Navigate(new LobbyPage(lobbyId, playerId));
+                break;
+
+                case LobbyStatus.PLAYING:
+                    this.NavigationService.Navigate(new GamePage(lobbyId, playerId));
+                break;
+
+                case LobbyStatus.AWAITING_RESTART:
+
+                break;
+
+                default:
+                    
+                break;
+            }
         }
 
         private async void OnHostBttn(object sender, RoutedEventArgs e)
         {
             LoginDialogData data = await (Application.Current.MainWindow as MainWindow).ShowLoginAsync("Host", "Enter username");
-            (Application.Current as App).ClientWrapper.NetworkConnection.Write(new DrawniteCore.Networking.Data.Message("host", new 
+            this.NetworkConnection.Write(new DrawniteCore.Networking.Data.Message("player/host", new 
             { 
                 Username = data.Username,
                 Password = data.Password
@@ -79,7 +95,7 @@ namespace DrawniteClient.Pages
 
             DrawniteCore.Networking.Data.Message returnMessage = null;
             ManualResetEvent receivedSignal = new ManualResetEvent(false);
-            (Application.Current as App).ClientWrapper.OnReceived += async (client, message) => 
+            this.NetworkConnection.OnReceived += async (client, message) => 
             {
                 returnMessage = message;
                 receivedSignal.Set();
@@ -87,10 +103,10 @@ namespace DrawniteClient.Pages
             receivedSignal.WaitOne();
 
             int lobbyPort = returnMessage.Data.LobbyInfo.LobbyPort;
-            bool result = (Application.Current as App).ClientWrapper.Forward(new System.Net.IPEndPoint(IPAddress.Parse(Constants.SERVER_IP), lobbyPort));
+            bool result = this.NetworkClient.Forward(new System.Net.IPEndPoint(IPAddress.Parse(Constants.SERVER_IP), lobbyPort));
             if (result)
             {
-                (Application.Current as App).ClientWrapper.NetworkConnection.Write(new Message("player/join", new
+                this.NetworkConnection.Write(new Message("player/join", new
                 {
                     Username = data.Username,
                     GUID = returnMessage.Data.PlayerGuid
@@ -99,7 +115,7 @@ namespace DrawniteClient.Pages
 
             Guid lobbyId = returnMessage.Data.LobbyInfo.LobbyId;
             Guid playerId = returnMessage.Data.PlayerGuid;
-            parentFrameView.Navigate(new Page1(lobbyId, playerId));
+            this.NavigationService.Navigate(new LobbyPage(lobbyId, playerId));
         }
     }
 }

@@ -31,9 +31,9 @@ namespace DrawniteCore.Networking
         {
             this.networkLock = new object();
             this.networkStream = networkStream;
+            active = true;
             new Thread(Receive).Start();
             this.remoteEndPoint = remoteEndPoint;
-            active = true;
             OnSuccessfulConnection?.Invoke(this, null);
         }
 
@@ -49,19 +49,9 @@ namespace DrawniteCore.Networking
 
         public void Write(byte[] data)
         {
-            lock (networkLock)
-            {
-                byte[] messageLength = BitConverter.GetBytes(data.Length);
-                networkStream.Write(messageLength, 0, messageLength.Length);
-
-                AwaitConfirmation();
-                WriteConfirmation();
-
-                networkStream.Write(data, 0, data.Length);
-
-                AwaitConfirmation();
-                WriteConfirmation();
-            }
+            byte[] messageLength = BitConverter.GetBytes(data.Length);
+            networkStream.Write(messageLength, 0, messageLength.Length);
+            networkStream.Write(data, 0, data.Length);
         }
 
         private void Receive()
@@ -70,34 +60,20 @@ namespace DrawniteCore.Networking
             {
                 while (active)
                 {
-                    lock (networkLock)
-                    {
-                        if (networkStream.DataAvailable)
-                        {
-                            byte[] lengthBuffer = new byte[4];
-                            networkStream.Read(lengthBuffer, 0, lengthBuffer.Length);
-                            int receivingByteSize = BitConverter.ToInt32(lengthBuffer, 0);
+                    byte[] lengthBuffer = new byte[4];
+                    networkStream.Read(lengthBuffer, 0, lengthBuffer.Length);
+                    int receivingByteSize = BitConverter.ToInt32(lengthBuffer, 0);
 
-                            if (receivingByteSize < 0)
-                                break;
+                    if (receivingByteSize <= 0)
+                        break;
 
-                            WriteConfirmation();
-                            AwaitConfirmation();
+                    byte[] networkMessage = new byte[receivingByteSize];
+                    networkStream.Read(networkMessage, 0, networkMessage.Length);
 
-                            byte[] networkMessage = new byte[receivingByteSize];
-                            networkStream.Read(networkMessage, 0, networkMessage.Length);
+                    Data.Message receivedMessage = Newtonsoft.Json.JsonConvert.DeserializeObject<Data.Message>(Encoding.ASCII.GetString(networkMessage));
 
-                            Data.Message receivedMessage = Newtonsoft.Json.JsonConvert.DeserializeObject<Data.Message>(Encoding.ASCII.GetString(networkMessage));
-
-                            WriteConfirmation();
-                            AwaitConfirmation();
-
-                            LastMessage = receivedMessage;
-                            OnReceived?.Invoke(this, receivedMessage);
-                        }
-                        else
-                            Thread.Sleep(1);
-                    }
+                    LastMessage = receivedMessage;
+                    OnReceived?.Invoke(this, receivedMessage);
                 }
             }
             catch (Exception e)

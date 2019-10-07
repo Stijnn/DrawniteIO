@@ -15,10 +15,11 @@ namespace DrawniteServer
         private DrawniteCore.Networking.Data.LobbyInfo lobbyInfo;
         public DrawniteCore.Networking.Data.LobbyInfo LobbyInfo => lobbyInfo;
 
-        private Queue<Message> playerMessageQueue;
+        private Queue<Tuple<IConnection, Message>> playerMessageQueue;
         private TcpServerWrapper lobbyServer;
-        private Dictionary<Guid, string> playerList;
+        private List<Player> playerList;
         private bool lobbyActive;
+        private object runtimeLock;
 
         public int PlayerCount => lobbyServer.Connections.Count();
 
@@ -28,10 +29,12 @@ namespace DrawniteServer
             this.lobbyServer = new TcpServerWrapper(new System.Net.IPEndPoint(IPAddress.Any, lobbyPort));
             this.lobbyServer.OnClientConnected += OnPlayerJoinedLobby;
             this.lobbyServer.OnClientDataReceived += OnPlayerDataReceived;
-            this.playerMessageQueue = new Queue<Message>();
-            this.playerList = new Dictionary<Guid, string>();
+            this.lobbyServer.OnClientDisconnected += OnPlayerDisconnected;
+            this.playerMessageQueue = new Queue<Tuple<IConnection, Message>>();
+            this.playerList = new List<Player>();
             lobbyActive = this.lobbyServer.StartAsync().Result;
 
+            this.runtimeLock = new object();
             if (lobbyActive)
                 new Thread(RunGame).Start();
         }
@@ -40,25 +43,28 @@ namespace DrawniteServer
         {
             while (lobbyActive)
             {
-                if (playerMessageQueue.Count > 0)
+                lock (runtimeLock)
                 {
-                    HandleMessage(playerMessageQueue.Dequeue());
-                    continue;
-                }
+                    if (playerMessageQueue.Count > 0)
+                    {
+                        HandleMessage(playerMessageQueue.Dequeue());
+                        continue;
+                    }
 
-                switch (LobbyInfo.LobbyStatus)
-                {
-                    case DrawniteCore.Networking.Data.LobbyStatus.AWAITING_START:
-                        AwaitingStart();
-                    break;
+                    switch (LobbyInfo.LobbyStatus)
+                    {
+                        case DrawniteCore.Networking.Data.LobbyStatus.AWAITING_START:
+                            AwaitingStart();
+                            break;
 
-                    case DrawniteCore.Networking.Data.LobbyStatus.PLAYING:
-                        Play();
-                    break;
+                        case DrawniteCore.Networking.Data.LobbyStatus.PLAYING:
+                            Play();
+                            break;
 
-                    case DrawniteCore.Networking.Data.LobbyStatus.AWAITING_RESTART:
-                        AwaitingRestart();
-                    break;
+                        case DrawniteCore.Networking.Data.LobbyStatus.AWAITING_RESTART:
+                            AwaitingRestart();
+                            break;
+                    }
                 }
             }
         }
@@ -73,19 +79,58 @@ namespace DrawniteServer
             
         }
 
-        private void OnPlayerDataReceived(IConnection client, dynamic args)
+        private void OnPlayerDisconnected(IConnection client, dynamic args)
         {
-            playerMessageQueue.Enqueue(args);
+            lock (runtimeLock)
+            {
+                Player disconnectingPlayer = playerList.Where(x => x.ReplicatedConnection == client).FirstOrDefault();
+                if (disconnectingPlayer != null)
+                {
+                    playerList.ForEach(x => x.ReplicatedConnection.Write(new Message("player/disconnected", new
+                    {
+                        Player = disconnectingPlayer
+                    })));
+                    playerList.Remove(disconnectingPlayer);
+                }
+            }
         }
 
-        private void HandleMessage(Message msg)
+        private void OnPlayerDataReceived(IConnection client, dynamic args)
         {
-            switch (msg.Command)
+            playerMessageQueue.Enqueue(new Tuple<IConnection, Message>(client, (Message)args));
+        }
+
+        private void HandleMessage(Tuple<IConnection, Message> message)
+        {
+            switch (message.Item2.Command)
             {
                 case "player/join":
-                    Guid playerGuid = msg.Data.GUID;
-                    string playerName = msg.Data.Username;
-                    playerList.Add(playerGuid, playerName);
+                {
+                    Guid playerGuid = message.Item2.Data.GUID;
+                    string playerName = message.Item2.Data.Username;
+                    Player player = new Player(playerGuid, playerName, playerGuid == lobbyInfo.LobbyLeader);
+                    player.ReplicatedConnection = message.Item1;
+                    playerList.Add(player);
+                    Message networkMessage = new Message("player/connected", new
+                    {
+                        Player = player
+                    });
+
+                    for (int i = 0; i < lobbyServer.Connections.Count(); i++)
+                    {
+                        lobbyServer.Connections.ElementAt(i).Write(networkMessage);
+                    }
+                }
+                break;
+
+                case "lobby/playerlist":
+                {
+                    Message networkMessage = new Message("lobby/playerlist", new
+                    {
+                        PlayerList = playerList,
+                    });
+                    message.Item1.Write(networkMessage);
+                }
                 break;
 
                 default:

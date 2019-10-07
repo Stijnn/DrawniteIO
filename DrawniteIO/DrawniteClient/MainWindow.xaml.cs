@@ -25,7 +25,12 @@ namespace DrawniteClient
         public MainWindow()
         {
             InitializeComponent();
-            FrameViewPage.Navigate(new Pages.StartPage(ref FrameViewPage));
+            FrameViewPage.Navigate(new Views.StartPage());
+        }
+
+        private void OnWindowClosing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            (App.Current as App).ClientWrapper.Disconnect();
         }
     }
 }
