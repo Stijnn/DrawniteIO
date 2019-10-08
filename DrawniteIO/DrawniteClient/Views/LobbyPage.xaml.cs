@@ -35,6 +35,7 @@ namespace DrawniteClient.Views
             InitializeComponent();
             IsLobbyLeader = isLeader;
             this.MyPlayerId = playerId;
+            this.LobbyId = lobbyId;
             this.NetworkConnection.OnReceived += OnPacketReceived;
             txtLobbyKey.Text = lobbyId.ToString();
             btnStart.IsEnabled = IsLobbyLeader;
