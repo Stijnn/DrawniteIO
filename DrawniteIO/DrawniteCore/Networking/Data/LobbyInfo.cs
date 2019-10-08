@@ -23,7 +23,9 @@ namespace DrawniteCore.Networking.Data
     public enum LobbyStatus
     {
         AWAITING_START,
+        STARTING,
         PLAYING,
         AWAITING_RESTART,
+        RESTARTING,
     }
 }

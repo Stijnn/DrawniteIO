@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace DrawniteServer
@@ -24,6 +25,7 @@ namespace DrawniteServer
             while (true)
             {
                 LobbyManager?.Update();
+                Thread.Sleep(1);
             }
         }
 

@@ -13,5 +13,7 @@ namespace DrawniteClient.Views
     {
         public TcpClientWrapper NetworkClient => (App.Current as App).ClientWrapper;
         public IConnection NetworkConnection => NetworkClient.NetworkConnection;
+
+        public MainWindow ParentWindow => (App.Current.MainWindow as MainWindow);
     }
 }

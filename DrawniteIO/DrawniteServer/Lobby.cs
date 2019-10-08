@@ -148,6 +148,48 @@ namespace DrawniteServer
                     message.Item1.Write(networkMessage);
                 }
                 break;
+
+                case "lobby/cancel":
+                {
+                    this.lobbyInfo.LobbyStatus = LobbyStatus.AWAITING_START;
+                    Message networkMessage = new Message("lobby/cancelled", null);
+                    playerList.ForEach(x => x.ReplicatedConnection.Write(networkMessage));
+                }
+                break;
+
+                case "lobby/trystart":
+                {
+                    Guid sender = message.Item2.Data.PlayerId;
+                    if (sender != lobbyInfo.LobbyLeader)
+                    {
+                        message.Item1.Write(new Message("lobby/error", new
+                        {
+                            ErrorMessage = "You are not the host",
+                        }));
+                    }
+                    else
+                    {
+                        if (playerList.Count >= 2)
+                        {
+                            lobbyInfo.LobbyStatus = LobbyStatus.STARTING;
+                            playerList.ForEach(x => x.ReplicatedConnection.Write(new Message("lobby/starting", null)));
+                        }
+                        else
+                        {
+                            message.Item1.Write(new Message("lobby/error", new
+                            {
+                                ErrorMessage = "Not enough players to start the game. Need 2 or more players.",
+                            }));
+                        }
+                    }
+                }
+                break;
+
+                case "lobby/start":
+                {
+                    playerList.ForEach(x => x.ReplicatedConnection.Write(new Message("game/start", null)));
+                }
+                break;
             }
         }
 
