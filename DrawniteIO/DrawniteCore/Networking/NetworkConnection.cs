@@ -26,6 +26,7 @@ namespace DrawniteCore.Networking
         public event IConnection.ConnectionEventHandler OnSuccessfulConnection;
         public event IConnection.ConnectionEventHandler OnDisconnected;
         public event IConnection.ConnectionEventHandler OnError;
+        private object writeLock = new object();
 
         public NetworkConnection(ref NetworkStream networkStream, IPEndPoint remoteEndPoint)
         {
@@ -49,9 +50,12 @@ namespace DrawniteCore.Networking
 
         public void Write(byte[] data)
         {
-            byte[] messageLength = BitConverter.GetBytes(data.Length);
-            networkStream.Write(messageLength, 0, messageLength.Length);
-            networkStream.Write(data, 0, data.Length);
+            lock (writeLock)
+            {
+                byte[] messageLength = BitConverter.GetBytes(data.Length);
+                networkStream.Write(messageLength, 0, messageLength.Length);
+                networkStream.Write(data, 0, data.Length);
+            }
         }
 
         private void Receive()
@@ -70,10 +74,14 @@ namespace DrawniteCore.Networking
                     byte[] networkMessage = new byte[receivingByteSize];
                     networkStream.Read(networkMessage, 0, networkMessage.Length);
 
-                    Data.Message receivedMessage = Newtonsoft.Json.JsonConvert.DeserializeObject<Data.Message>(Encoding.ASCII.GetString(networkMessage));
+                    try
+                    {
+                        Data.Message receivedMessage = Newtonsoft.Json.JsonConvert.DeserializeObject<Data.Message>(Encoding.ASCII.GetString(networkMessage));
 
-                    LastMessage = receivedMessage;
-                    OnReceived?.Invoke(this, receivedMessage);
+                        LastMessage = receivedMessage;
+                        OnReceived?.Invoke(this, receivedMessage);
+                    }
+                    catch (Exception) { }
                 }
             }
             catch (Exception e)

@@ -131,7 +131,8 @@ namespace DrawniteClient.Views
                             if (currentSecond < 10)
                             {
                                 long ms = currentTime - actualStart;
-                                controller.SetProgress(ms);
+                                if (ms <= 10010)
+                                    controller.SetProgress(ms);
                             }
                         }
 
@@ -154,9 +155,13 @@ namespace DrawniteClient.Views
 
                 case "lobby/cancelled":
                 {
-                    await Dispatcher.Invoke(async () =>
+                    Dispatcher.Invoke(() =>
                     {
-                        await controller?.CloseAsync();
+                        try
+                        {
+                            controller.CloseAsync();
+                        }
+                        catch (Exception) { }
                     });
                 }
                 break;
@@ -165,16 +170,20 @@ namespace DrawniteClient.Views
                 {
                     if (controller.IsOpen)
                     {
-                        await Dispatcher.Invoke(async () =>
+                        Dispatcher.Invoke(() =>
                         {
-                            await controller?.CloseAsync();
+                            try
+                            {
+                                controller.CloseAsync();
+                            }
+                            catch (Exception) {}
                         });
                     }
 
-                    await Dispatcher.BeginInvoke(new Action(async () =>
+                    Dispatcher.Invoke(() =>
                     {
                         this.NavigationService.Navigate(new GamePage(LobbyId, MyPlayerId));
-                    }), null);
+                    });
                 }
                 break;
             }

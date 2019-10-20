@@ -197,6 +197,45 @@ namespace DrawniteServer
                     gameState = GameState.PLAYING;
                 }
                 break;
+
+                case "canvas/update":
+                {
+                    if (selectedPlayer.ReplicatedConnection == message.Item1)
+                    {
+                        playerList.ForEach(x =>
+                        {
+                            if (x.ReplicatedConnection != message.Item1)
+                                x.ReplicatedConnection.Write(message.Item2);
+                        });
+                    }
+                }
+                break;
+
+                case "game/chat":
+                    {
+                        Player sender = playerList.Where(x => x.ReplicatedConnection == message.Item1).FirstOrDefault();
+                        if (scoreBoard != null && sender != null)
+                        {
+                            if (guessers.Contains(sender))
+                            {
+                                message.Item2.Data.Message = $"{sender.Username}: " + message.Item2.Data.Message;
+                                for (int i = 0; i < guessers.Count; i++)
+                                {
+                                    guessers.ElementAt(i).ReplicatedConnection.Write(message.Item2);
+                                }
+                            }
+                            else if (!guessers.Contains(sender) && message.Item2.Data.Message == selectedWord)
+                            {
+                                guessers.Push(sender);
+                            }
+                            else
+                            {
+                                message.Item2.Data.Message = $"{sender.Username}: " + message.Item2.Data.Message;
+                                playerList.ForEach(x => x.ReplicatedConnection.Write(message.Item2));
+                            }
+                        }
+                    }
+                break;
             }
         }
 
@@ -297,6 +336,9 @@ namespace DrawniteServer
                         startTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
                     }
 
+                    if (guessers.Count == playerList.Count - 1)
+                        secondsRemaining = 0;
+
                     if (secondsRemaining == 0)
                     {
                         int index = 0;
@@ -307,7 +349,10 @@ namespace DrawniteServer
                             scoreBoard[guesser] = baseScore + index++;
                         }
 
-                        if (selectedPlayer == playerList[playerIndexOffset])
+                        if (playerIndexOffset == playerList.Count)
+                            playerIndexOffset = 0;
+
+                        if (selectedPlayer == playerList[playerList.Count - 1])
                             currentRound++;
 
                         if (currentRound == rounds)
