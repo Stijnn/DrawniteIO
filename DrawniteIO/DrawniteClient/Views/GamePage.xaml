@@ -9,12 +9,15 @@
       d:DesignHeight="450" d:DesignWidth="800" 
       Title="Page1">
     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+        
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="2*"/>
             <ColumnDefinition Width="4*"/>
             <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
+        
         <DataGrid Grid.Column="0" Margin="5,5,0,5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" AlternatingRowBackground="#FF666666" AlternationCount="1" mah:DataGridHelper.EnableCellEditAssist="True"/>
+        
         <Grid Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="10*"/>
@@ -25,6 +28,11 @@
             </ScrollViewer>
             <TextBox HorizontalAlignment="Stretch" Grid.Row="1" Margin="0,0,5,5"  TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Stretch" Height="40" FontSize="20"/>
         </Grid>
-        <InkCanvas Grid.Column="1" Margin="10,0,10,5" HorizontalAlignment="Stretch" IsEnabled="True" VerticalAlignment="Stretch" Background="White"/>
+
+        <Canvas x:Name="parentCanvas" Grid.Column="1" Margin="5,5,5,5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="Transparent">
+            <InkCanvas x:Name="MainDrawingCanvas" IsEnabled="True" Background="White" StrokeCollected="InkCanvas_StrokeCollected" Height="{Binding ElementName=parentCanvas, Path=ActualHeight}"
+               Width="{Binding ElementName=parentCanvas, Path=ActualWidth}"/>
+        </Canvas>
+    
     </Grid>
 </local:NetworkPage>

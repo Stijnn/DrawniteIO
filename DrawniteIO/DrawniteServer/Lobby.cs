@@ -190,6 +190,12 @@ namespace DrawniteServer
                     playerList.ForEach(x => x.ReplicatedConnection.Write(new Message("game/start", null)));
                 }
                 break;
+
+                case "canvas/update":
+                {
+                        playerList.ForEach(x => x.ReplicatedConnection.Write(message.Item2));
+                }
+                break;
             }
         }
 
