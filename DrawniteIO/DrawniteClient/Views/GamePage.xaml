@@ -14,7 +14,12 @@
             <ColumnDefinition Width="4*"/>
             <ColumnDefinition Width="2*"/>
         </Grid.ColumnDefinitions>
-        <DataGrid Grid.Column="0" Margin="5,5,0,5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" AlternatingRowBackground="#FF666666" AlternationCount="1" mah:DataGridHelper.EnableCellEditAssist="True"/>
+        <DataGrid Grid.Column="0" Margin="5,5,0,5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" AlternatingRowBackground="#FF666666" AlternationCount="1" mah:DataGridHelper.EnableCellEditAssist="True" x:Name="scoreBoard">
+            <DataGrid.Columns>
+                <DataGridTextColumn x:Name="colName" Width="1*" Header="Username"/>
+                <DataGridTextColumn x:Name="colScore" Width="1*" Header="Score" />
+            </DataGrid.Columns>
+        </DataGrid>
         <Grid Grid.Column="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
             <Grid.RowDefinitions>
                 <RowDefinition Height="10*"/>

@@ -2,6 +2,7 @@
 using DrawniteCore.Networking.Data;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -37,6 +38,16 @@ namespace DrawniteServer
             this.runtimeLock = new object();
             if (lobbyActive)
                 new Thread(RunGame).Start();
+        }
+
+        public string GetRandomWord()
+        {
+            string[] JSON_FOLDER_SEGEMENTS = new Uri(Directory.GetCurrentDirectory()).Segments;
+            string JSON_FOLDER_NOUSAGE = string.Concat(Util.SubArray(JSON_FOLDER_SEGEMENTS, 0, JSON_FOLDER_SEGEMENTS.Length - 3)) + "words.txt";
+            string wordsFile = JSON_FOLDER_NOUSAGE.Remove(0, 1);
+            string[] words = File.ReadAllLines(wordsFile);
+            Random random = new Random(DateTime.Now.Millisecond);
+            return words[random.Next(0, words.Length - 1)];
         }
 
         private void RunGame()
@@ -263,7 +274,7 @@ namespace DrawniteServer
         private long startTime = 0;
         private long currentTime = 0;
 
-        private Dictionary<Player, int> scoreBoard;
+        private Dictionary<string, int> scoreBoard;
         private Stack<Player> guessers;
         private void Play()
         {
@@ -277,13 +288,13 @@ namespace DrawniteServer
 
                     if (scoreBoard == null)
                     {
-                        scoreBoard = new Dictionary<Player, int>();
-                        playerList.ForEach(x => scoreBoard.Add(x, 0));
+                        scoreBoard = new Dictionary<string, int>();
+                        playerList.ForEach(x => scoreBoard.Add(x.Username, 0));
                     }
                 break;
 
                 case GameState.SELECTING:
-                    selectedWord = "Regenboog";
+                    selectedWord = GetRandomWord();
                     selectedPlayer.ReplicatedConnection.Write(new Message("game/selected", new
                     {
                         Word = selectedWord,
@@ -329,7 +340,8 @@ namespace DrawniteServer
                             x.ReplicatedConnection.Write(new Message("game/playing", new
                             {
                                 TimeLeft = secondsRemaining,
-                                PlayerList = playerList
+                                PlayerList = playerList,
+                                ScoreBoard = scoreBoard
                             }));
                         });
 
@@ -346,7 +358,7 @@ namespace DrawniteServer
                         while(guessers.Count > 0)
                         {
                             Player guesser = guessers.Pop();
-                            scoreBoard[guesser] = baseScore + index++;
+                            scoreBoard[guesser.Username] = baseScore + index++;
                         }
 
                         if (playerIndexOffset == playerList.Count)
@@ -373,6 +385,7 @@ namespace DrawniteServer
 
                     startTime = 0;
                     currentRound = 0;
+                    gameState = GameState.AWAITING;
                     LobbyInfo.LobbyStatus = LobbyStatus.AWAITING_RESTART;
                 break;
             }
@@ -382,6 +395,7 @@ namespace DrawniteServer
 
         private void AwaitingRestart()
         {
+            gameState = GameState.LOADING;
             LobbyInfo.LobbyStatus = LobbyStatus.AWAITING_START;
         }
     }

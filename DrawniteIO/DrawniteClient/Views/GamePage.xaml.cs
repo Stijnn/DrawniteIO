@@ -38,6 +38,8 @@ namespace DrawniteClient.Views
             this.isDrawer = false;
 
             this.NetworkConnection.OnReceived += OnReceived;
+            colName.Binding = new Binding("username");
+            colScore.Binding = new Binding("score");
         }
 
         //private void MainDrawingCanvas_StrokeCollected(object sender, InkCanvasStrokeCollectedEventArgs e)
@@ -72,6 +74,12 @@ namespace DrawniteClient.Views
         //    return returned;
         //}
 
+
+        public struct MyData
+        {
+            public string username { get; set; }
+            public string score { get; set; }
+        }
 
         private async void OnReceived(DrawniteCore.Networking.IConnection sender, dynamic args)
         {
@@ -118,9 +126,16 @@ namespace DrawniteClient.Views
                     {
                         Dispatcher.Invoke(() =>
                         {
+                            Dictionary<string, int> scoreBoard = (msg.Data.ScoreBoard as JObject).ToObject<Dictionary<string, int>>(); 
                             try
                             {
                                 this.ParentWindow.HideOverlay();
+                                this.scoreBoard.Items.Clear();
+                                foreach (string item in scoreBoard.Keys)
+                                {
+                                    MyData data = new MyData() { username = item, score = scoreBoard[item].ToString() };
+                                    this.scoreBoard.Items.Add(data);
+                                }
                             }
                             catch (Exception e) {}
 
@@ -143,7 +158,8 @@ namespace DrawniteClient.Views
                 case "game/end":
                     Dispatcher.Invoke(() =>
                     {
-                        this.NavigationService.GoBack();
+                        if (this.NavigationService != null)
+                            this.NavigationService.GoBack();
                     });
                 break;
 
