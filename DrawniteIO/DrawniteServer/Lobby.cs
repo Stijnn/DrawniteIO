@@ -188,6 +188,13 @@ namespace DrawniteServer
                 case "lobby/start":
                 {
                     playerList.ForEach(x => x.ReplicatedConnection.Write(new Message("game/start", null)));
+                        lobbyInfo.LobbyStatus = LobbyStatus.PLAYING;
+                    }
+                break;
+
+                case "game/selected":
+                {
+                    gameState = GameState.PLAYING;
                 }
                 break;
             }
@@ -198,14 +205,139 @@ namespace DrawniteServer
 
         }
 
+        enum GameState
+        {
+            LOADING,
+            SELECTING,
+            AWAITING,
+            PLAYING,
+            SCORE
+        }
+
+        private GameState gameState = GameState.LOADING;
+        private Player selectedPlayer;
+        private int playerIndexOffset;
+        private int rounds = 1;
+        private int currentRound = 0;
+        private string selectedWord;
+        private int secondsRemaining = 120;
+        private long startTime = 0;
+        private long currentTime = 0;
+
+        private Dictionary<Player, int> scoreBoard;
+        private Stack<Player> guessers;
         private void Play()
         {
+            switch (gameState)
+            {
+                case GameState.LOADING:
+                    selectedPlayer = playerList[playerIndexOffset++];
+                    gameState = GameState.SELECTING;
+                    secondsRemaining = 120;
+                    guessers = new Stack<Player>();
 
+                    if (scoreBoard == null)
+                    {
+                        scoreBoard = new Dictionary<Player, int>();
+                        playerList.ForEach(x => scoreBoard.Add(x, 0));
+                    }
+                break;
+
+                case GameState.SELECTING:
+                    selectedWord = "Regenboog";
+                    selectedPlayer.ReplicatedConnection.Write(new Message("game/selected", new
+                    {
+                        Word = selectedWord,
+                    }));
+
+                    playerList.ForEach(x =>
+                    {
+                        if (x != selectedPlayer)
+                            x.ReplicatedConnection.Write(new Message("game/awaiting", new
+                            {
+                                Drawer = selectedPlayer.Username,
+                                PlayerList = playerList,
+                            }));
+                    });
+
+                    gameState = GameState.AWAITING;
+                break;
+
+                case GameState.PLAYING:
+                    if (startTime == 0)
+                    {
+                        playerList.ForEach(x =>
+                        {
+                            if (x != selectedPlayer)
+                                x.ReplicatedConnection.Write(new Message("game/starting", new
+                                {
+                                    Drawer = selectedPlayer.Username,
+                                    PlayerList = playerList,
+                                }));
+                        });
+
+                        startTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                        currentTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    }
+                    else
+                        currentTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+
+                    if (currentTime - startTime >= 1000)
+                    {
+                        secondsRemaining--;
+                        playerList.ForEach(x =>
+                        {
+                            x.ReplicatedConnection.Write(new Message("game/playing", new
+                            {
+                                TimeLeft = secondsRemaining,
+                                PlayerList = playerList
+                            }));
+                        });
+
+                        startTime = DateTimeOffset.Now.ToUnixTimeMilliseconds();
+                    }
+
+                    if (secondsRemaining == 0)
+                    {
+                        int index = 0;
+                        int baseScore = 10;
+                        while(guessers.Count > 0)
+                        {
+                            Player guesser = guessers.Pop();
+                            scoreBoard[guesser] = baseScore + index++;
+                        }
+
+                        if (selectedPlayer == playerList[playerIndexOffset])
+                            currentRound++;
+
+                        if (currentRound == rounds)
+                            gameState = GameState.SCORE;
+                        else
+                            gameState = GameState.LOADING;
+                    }
+                break;
+
+                case GameState.SCORE:
+                    playerList.ForEach(x =>
+                    {
+                        x.ReplicatedConnection.Write(new Message("game/end", new
+                        {
+                            Scoreboard = scoreBoard
+                        }));
+                    });
+
+                    startTime = 0;
+                    currentRound = 0;
+                    LobbyInfo.LobbyStatus = LobbyStatus.AWAITING_RESTART;
+                break;
+            }
+
+            Thread.Sleep(5);
         }
 
         private void AwaitingRestart()
         {
-
+            LobbyInfo.LobbyStatus = LobbyStatus.AWAITING_START;
         }
     }
 }

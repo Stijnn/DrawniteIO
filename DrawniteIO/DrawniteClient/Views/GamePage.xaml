@@ -25,6 +25,6 @@
             </ScrollViewer>
             <TextBox HorizontalAlignment="Stretch" Grid.Row="1" Margin="0,0,5,5"  TextWrapping="Wrap" Text="TextBox" VerticalAlignment="Stretch" Height="40" FontSize="20"/>
         </Grid>
-        <InkCanvas Grid.Column="1" Margin="10,0,10,5" HorizontalAlignment="Stretch" IsEnabled="True" VerticalAlignment="Stretch" Background="White"/>
+        <InkCanvas Grid.Column="1" Margin="10,0,10,5" HorizontalAlignment="Stretch" IsEnabled="True" VerticalAlignment="Stretch" Background="White" x:Name="drawingCanvas"/>
     </Grid>
 </local:NetworkPage>
