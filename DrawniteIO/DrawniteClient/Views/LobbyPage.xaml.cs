@@ -128,8 +128,11 @@ namespace DrawniteClient.Views
                                 secondPassedCheck = currentTime;
                             }
 
-                            long ms = currentTime - actualStart;
-                            controller.SetProgress(ms);
+                            if (currentSecond < 10)
+                            {
+                                long ms = currentTime - actualStart;
+                                controller.SetProgress(ms);
+                            }
                         }
 
                         if (currentSecond == 10)
