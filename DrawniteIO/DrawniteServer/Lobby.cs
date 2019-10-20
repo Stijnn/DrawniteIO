@@ -197,6 +197,12 @@ namespace DrawniteServer
                     gameState = GameState.PLAYING;
                 }
                 break;
+
+                case "canvas/update":
+                {
+                        playerList.ForEach(x => x.ReplicatedConnection.Write(message.Item2));
+                }
+                break;
             }
         }
 

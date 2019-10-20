@@ -70,10 +70,17 @@ namespace DrawniteCore.Networking
                     byte[] networkMessage = new byte[receivingByteSize];
                     networkStream.Read(networkMessage, 0, networkMessage.Length);
 
-                    Data.Message receivedMessage = Newtonsoft.Json.JsonConvert.DeserializeObject<Data.Message>(Encoding.ASCII.GetString(networkMessage));
-
-                    LastMessage = receivedMessage;
-                    OnReceived?.Invoke(this, receivedMessage);
+                    try
+                    {
+                        Data.Message receivedMessage = Newtonsoft.Json.JsonConvert.DeserializeObject<Data.Message>(Encoding.ASCII.GetString(networkMessage));
+                        LastMessage = receivedMessage;
+                        OnReceived?.Invoke(this, receivedMessage);
+                    }
+                    catch(Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                    
                 }
             }
             catch (Exception e)
